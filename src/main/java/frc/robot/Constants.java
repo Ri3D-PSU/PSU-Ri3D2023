@@ -14,9 +14,12 @@ package frc.robot;
  * reduce verbosity.
  */
 public final class Constants {
+
+    public static final String LOG_DIRECTORY = "/home/lvuser/logs";
+    public static final long MIN_FREE_SPACE = 1024 * 1024 * 100; // 100 MB
     public static final Mode currentMode = Mode.REAL;
 
-    public static enum Mode {
+    public enum Mode {
         /**
          * Running on a real robot.
          */

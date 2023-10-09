@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.LOG_DIRECTORY;
+import static frc.robot.Constants.MIN_FREE_SPACE;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -45,7 +48,8 @@ public class Robot extends LoggedRobot {
         switch (Constants.currentMode) {
             // Running on a real robot, log to a USB stick
             case REAL -> {
-                logger.addDataReceiver(new WPILOGWriter("/media/sda1/"));
+                Utility.deleteOldLogs(LOG_DIRECTORY, MIN_FREE_SPACE);
+                logger.addDataReceiver(new WPILOGWriter(LOG_DIRECTORY));
                 logger.addDataReceiver(new NT4Publisher());
             }
 
