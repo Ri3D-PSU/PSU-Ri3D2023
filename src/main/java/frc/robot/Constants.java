@@ -1,5 +1,4 @@
 // Copyright (c) FIRST and other WPILib contributors.
-
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -10,11 +9,30 @@ package frc.robot;
  * class should not be used for any other purpose. All constants should be declared globally (i.e. public static). Do
  * not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes) wherever the constants are needed, to
+ * reduce verbosity.
  */
 public final class Constants {
-    public static class OperatorConstants {
-        public static final int DRIVER_CONTROLLER_PORT = 0;
+
+    public static final String LOG_DIRECTORY = "/home/lvuser/logs";
+    public static final long MIN_FREE_SPACE = 1024 * 1024 * 100; // 100 MB
+    public static final Mode currentMode = Mode.REAL;
+
+    public enum Mode {
+        /**
+         * Running on a real robot.
+         */
+        REAL,
+
+        /**
+         * Running a physics simulator.
+         */
+        SIM,
+
+        /**
+         * Replaying from a log file.
+         */
+        REPLAY
     }
 }
