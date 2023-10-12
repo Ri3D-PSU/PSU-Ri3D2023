@@ -4,7 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.sensors.Pigeon2;
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.util.Units;
 
 public class DriveIOFalcon500 implements DriveIO {
@@ -16,13 +16,13 @@ public class DriveIOFalcon500 implements DriveIO {
     private final TalonFX leftFollower;
     private final TalonFX rightFollower;
 
-    private final Pigeon2 gyro;
+    private final AHRS gyro;
 
     public DriveIOFalcon500() {
-        leftLeader = new TalonFX(1);
-        rightLeader = new TalonFX(2);
-        leftFollower = new TalonFX(3);
-        rightFollower = new TalonFX(4);
+        leftLeader = new TalonFX(3);
+        rightLeader = new TalonFX(1);
+        leftFollower = new TalonFX(4);
+        rightFollower = new TalonFX(2);
 
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.voltageCompSaturation = 12.0;
@@ -38,7 +38,7 @@ public class DriveIOFalcon500 implements DriveIO {
         leftFollower.setInverted(InvertType.FollowMaster);
         rightFollower.setInverted(InvertType.FollowMaster);
 
-        gyro = new Pigeon2(0);
+        gyro = new AHRS();
     }
 
     @Override
@@ -51,7 +51,12 @@ public class DriveIOFalcon500 implements DriveIO {
                 leftLeader.getSelectedSensorVelocity() * 10 / TICKS_PER_REV / GEAR_RATIO);
         inputs.rightVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(
                 rightLeader.getSelectedSensorVelocity() * 10 / TICKS_PER_REV / GEAR_RATIO);
-        inputs.gyroYawRad = gyro.getYaw();
+        inputs.gyroYawRad = Math.toRadians(gyro.getYaw());
+        inputs.leftLeaderCurrent = leftLeader.getSupplyCurrent();
+        inputs.leftFollowerCurrent = leftFollower.getSupplyCurrent();
+        inputs.rightLeaderCurrent = rightLeader.getStatorCurrent();
+        inputs.rightFollowerCurrent = rightFollower.getStatorCurrent();
+
     }
 
     @Override
