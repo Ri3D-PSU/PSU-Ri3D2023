@@ -14,6 +14,7 @@ public class Drive extends SubsystemBase {
     private final DriveIO io;
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
     private final DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(new Rotation2d(), 0.0, 0.0);
+    private boolean isFirstRun = true;
 
     /**
      * Creates a new Drive.
@@ -28,6 +29,12 @@ public class Drive extends SubsystemBase {
         Logger.getInstance().processInputs("Drive", inputs);
 
         // Update odometry and log the new pose
+        if (isFirstRun && inputs.isGyroReady) {
+            System.out.println("Gyro Angle When Resetting = " + (-inputs.gyroYawRad));
+            odometry.resetPosition(new Rotation2d(-inputs.gyroYawRad), getLeftPositionMeters(),
+                    getRightPositionMeters(), new Pose2d());
+            isFirstRun = false;
+        }
         odometry.update(new Rotation2d(-inputs.gyroYawRad), getLeftPositionMeters(), getRightPositionMeters());
         Logger.getInstance().recordOutput("Odometry", getPose());
     }

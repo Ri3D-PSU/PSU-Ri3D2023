@@ -61,6 +61,9 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+
+        SmartDashboard.putNumber("driveleft", 0);
+        SmartDashboard.putNumber("driveright", 0);
     }
 
     /**
@@ -70,7 +73,11 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         drive.setDefaultCommand(
-                new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), controller.getLeftX()), drive));
+                new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), -controller.getRightX()), drive));
+        controller.leftBumper()
+                .whileTrue(new RunCommand(
+                        () -> drive.driveArcade(-controller.getLeftY() / 2.0, -controller.getRightX() / 2.0),
+                        drive));
     }
 
     /**

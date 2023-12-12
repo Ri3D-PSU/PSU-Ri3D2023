@@ -15,6 +15,8 @@ public interface DriveIO {
         public double rightLeaderCurrent = 0.0;
         public double rightFollowerCurrent = 0.0;
 
+        public boolean isGyroReady = true;
+
     }
 
     /**

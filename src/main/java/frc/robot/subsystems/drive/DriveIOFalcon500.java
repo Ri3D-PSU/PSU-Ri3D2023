@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.kauailabs.navx.frc.AHRS;
@@ -38,6 +39,11 @@ public class DriveIOFalcon500 implements DriveIO {
         leftFollower.setInverted(InvertType.FollowMaster);
         rightFollower.setInverted(InvertType.FollowMaster);
 
+        leftFollower.setNeutralMode(NeutralMode.Brake);
+        rightFollower.setNeutralMode(NeutralMode.Brake);
+        leftLeader.setNeutralMode(NeutralMode.Brake);
+        rightLeader.setNeutralMode(NeutralMode.Brake);
+
         gyro = new AHRS();
     }
 
@@ -56,7 +62,7 @@ public class DriveIOFalcon500 implements DriveIO {
         inputs.leftFollowerCurrent = leftFollower.getSupplyCurrent();
         inputs.rightLeaderCurrent = rightLeader.getStatorCurrent();
         inputs.rightFollowerCurrent = rightFollower.getStatorCurrent();
-
+        inputs.isGyroReady = gyro.isConnected() && !gyro.isCalibrating();
     }
 
     @Override
