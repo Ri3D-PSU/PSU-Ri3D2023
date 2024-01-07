@@ -1,7 +1,7 @@
 package frc.robot.subsystems.claw;
 
 public interface ClawIO {
-    public static class ClawIOInputs {
+    public static class ClawInputs {
         public double shooterLeftVoltage = 0.0;
         public double shooterRightVoltage = 0.0;
         public double shooterLeftCurrent = 0.0;
@@ -26,7 +26,7 @@ public interface ClawIO {
     /**
      * Updates the set of loggable inputs.
      */
-    public default void updateInputs(ClawIOInputs inputs) {
+    public default void updateInputs(ClawInputs inputs) {
     }
 
     public default void setShooterVelocity(double leftVelocity, double rightVelocity) {

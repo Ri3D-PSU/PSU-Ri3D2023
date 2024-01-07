@@ -49,7 +49,7 @@ public class ClawIOSparkMax implements ClawIO {
         intake.getPIDController().setFF(0.0);
     }
 
-    public void updateInputs(ClawIOInputs inputs) {
+    public void updateInputs(ClawInputs inputs) {
         inputs.shooterLeftVoltage = shooterLeft.getBusVoltage();
         inputs.shooterRightVoltage = shooterRight.getBusVoltage();
         inputs.shooterLeftCurrent = shooterLeft.getOutputCurrent();

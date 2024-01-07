@@ -22,7 +22,7 @@ public class ArmIOSparkMax implements ArmIO {
 
     }
 
-    public void updateInputs(ArmIOInputs inputs) {
+    public void updateInputs(ArmInputs inputs) {
         inputs.armPosition = arm.getEncoder().getPosition();
         inputs.armVelocity = arm.getEncoder().getVelocity();
         inputs.armCurrent = arm.getOutputCurrent();

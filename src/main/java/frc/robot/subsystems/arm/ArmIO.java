@@ -1,7 +1,7 @@
 package frc.robot.subsystems.arm;
 
 public interface ArmIO {
-    public static class ArmIOInputs {
+    public static class ArmInputs {
         public double armPosition = 0.0;
         public double armVelocity = 0.0;
         public double armCurrent = 0.0;
@@ -12,7 +12,7 @@ public interface ArmIO {
     /**
      * Updates the set of loggable inputs.
      */
-    public default void updateInputs(ArmIOInputs inputs) {
+    public default void updateInputs(ArmInputs inputs) {
 
     }
 
