@@ -4,17 +4,20 @@
 
 package frc.robot;
 
+import com.dacubeking.AutoBuilder.robot.GuiAuto;
+import com.dacubeking.AutoBuilder.robot.robotinterface.AutonomousContainer;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOFalcon500;
 import frc.robot.subsystems.drive.DriveIOSim;
+import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -30,7 +33,9 @@ public class RobotContainer {
     private final CommandXboxController controller = new CommandXboxController(0);
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+    private final LoggedDashboardChooser<String> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+    private final LoggedDashboardChooser<String> sideChooser = new LoggedDashboardChooser<>("Side Chooser");
+
     private final LoggedDashboardNumber flywheelSpeedInput = new LoggedDashboardNumber("Flywheel Speed", 1500.0);
 
     /**
@@ -56,14 +61,34 @@ public class RobotContainer {
                 break;
         }
 
+        // Initialize autonomous container
+        AutonomousContainer.getInstance().initialize(
+                false,
+                info -> new RamseteCommand(
+                        info.trajectory(),
+                        drive::getPose,
+                        new RamseteController(),
+                        drive.getFeedforward(),
+                        drive.getKinematics(),
+                        drive::getWheelSpeeds,
+                        new PIDController(0, 0, 0),
+                        new PIDController(0, 0, 0),
+                        drive::driveVoltage,
+                        drive
+                ),
+                drive::resetOdometry,
+                true,
+                this
+        );
+
         // Set up auto routines
-        autoChooser.addDefaultOption("Do Nothing", new InstantCommand());
+        sideChooser.addDefaultOption("Blue", "blue");
+        sideChooser.addOption("Red", "red");
+
+        AutonomousContainer.getInstance().getAutonomousNames().forEach(name -> autoChooser.addOption(name, name));
 
         // Configure the button bindings
         configureButtonBindings();
-
-        SmartDashboard.putNumber("driveleft", 0);
-        SmartDashboard.putNumber("driveright", 0);
     }
 
     /**
@@ -85,7 +110,7 @@ public class RobotContainer {
      *
      * @return the command to run in autonomous
      */
-    public Command getAutonomousCommand() {
-        return autoChooser.get();
+    public @Nullable GuiAuto getAutonomousCommand() {
+        return AutonomousContainer.getInstance().getAuto(autoChooser.get(), sideChooser.get(), true);
     }
 }

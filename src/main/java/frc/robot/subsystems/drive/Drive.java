@@ -1,8 +1,11 @@
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,8 +38,12 @@ public class Drive extends SubsystemBase {
                     getRightPositionMeters(), new Pose2d());
             isFirstRun = false;
         }
-        odometry.update(new Rotation2d(-inputs.gyroYawRad), getLeftPositionMeters(), getRightPositionMeters());
+        odometry.update(getHeading(), getLeftPositionMeters(), getRightPositionMeters());
         Logger.getInstance().recordOutput("Odometry", getPose());
+    }
+
+    public Rotation2d getHeading() {
+        return Rotation2d.fromDegrees(-inputs.gyroYawRad);
     }
 
     /**
@@ -44,6 +51,13 @@ public class Drive extends SubsystemBase {
      */
     public void drivePercent(double leftPercent, double rightPercent) {
         io.setVoltage(leftPercent * 12.0, rightPercent * 12.0);
+    }
+
+    /**
+     * Run open loop at the specified percentage.
+     */
+    public void driveVoltage(double leftVoltage, double rightVoltage) {
+        io.setVoltage(leftVoltage, rightVoltage);
     }
 
     /**
@@ -94,5 +108,25 @@ public class Drive extends SubsystemBase {
      */
     public double getRightVelocityMeters() {
         return inputs.rightVelocityRadPerSec * WHEEL_RADIUS_METERS;
+    }
+
+    public Pose2d getPoseMeters() {
+        return odometry.getPoseMeters();
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(getHeading(), getLeftPositionMeters(), getRightPositionMeters(), pose);
+    }
+
+    public SimpleMotorFeedforward getFeedforward() {
+        return new SimpleMotorFeedforward(0.0, 0.7, 0.2); //Temp values
+    }
+
+    public DifferentialDriveKinematics getKinematics() {
+        return new DifferentialDriveKinematics(0.6); //Temp values
+    }
+
+    public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+        return new DifferentialDriveWheelSpeeds(getLeftVelocityMeters(), getRightVelocityMeters());
     }
 }
