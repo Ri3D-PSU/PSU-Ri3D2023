@@ -171,13 +171,18 @@ public class RobotContainer {
      * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-
         drive.setDefaultCommand(
                 new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), -controller.getRightX()), drive));
         controller.leftBumper()
                 .whileTrue(new RunCommand(
                         () -> drive.driveArcade(-controller.getLeftY() / 2.0, -controller.getRightX() / 2.0),
                         drive));
+
+        controller.rightTrigger().whileTrue(intakeCommand);
+        controller.leftTrigger().whileTrue(outtakeCommand);
+
+        controller.a().whileTrue(shootCommand);
+        controller.povDown().whileTrue(scoreTrapCommand);
     }
 
     /**
