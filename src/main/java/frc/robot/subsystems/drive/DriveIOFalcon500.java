@@ -63,6 +63,7 @@ public class DriveIOFalcon500 implements DriveIO {
         inputs.rightLeaderCurrent = rightLeader.getStatorCurrent();
         inputs.rightFollowerCurrent = rightFollower.getStatorCurrent();
         inputs.isGyroReady = gyro.isConnected() && !gyro.isCalibrating();
+        inputs.gyroYawRadPerSec = Math.toRadians(gyro.getRate());
     }
 
     @Override

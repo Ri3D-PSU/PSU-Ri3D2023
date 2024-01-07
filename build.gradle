@@ -96,7 +96,7 @@ dependencies {
   def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
   annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 
-  implementation "com.dacubeking:autobuilder-robot:2.2.10-command-rewrite-beta"
+  implementation "com.dacubeking:autobuilder-robot:2.2.20-command-rewrite-beta"
 }
 
 test {
@@ -105,7 +105,7 @@ test {
 }
 
 // Simulation configuration (e.g. environment variables).
-wpi.sim.addGui()
+wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

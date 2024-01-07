@@ -9,6 +9,7 @@ import static frc.robot.Constants.MIN_FREE_SPACE;
 
 import com.dacubeking.AutoBuilder.robot.reflection.ClassInformationSender;
 import com.dacubeking.AutoBuilder.robot.robotinterface.AutonomousContainer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -117,8 +118,8 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void autonomousInit() {
+        System.out.println("AutonomousInit");
         autonomousCommand = robotContainer.getAutonomousCommand();
-
         // schedule the autonomous command (example)
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
@@ -175,6 +176,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         ClassInformationSender.updateReflectionInformation("frc.robot");
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     /**

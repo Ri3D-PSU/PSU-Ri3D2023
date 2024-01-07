@@ -44,24 +44,19 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.currentMode) {
             // Real robot, instantiate hardware IO implementations
-            case REAL:
-                drive = new Drive(new DriveIOFalcon500());
-                // drive = new Drive(new DriveIOFalcon500());
-                break;
+            case REAL -> drive = new Drive(new DriveIOFalcon500());
 
+            // drive = new Drive(new DriveIOFalcon500());
             // Sim robot, instantiate physics sim IO implementations
-            case SIM:
-                drive = new Drive(new DriveIOSim());
-                break;
+            case SIM -> drive = new Drive(new DriveIOSim());
 
             // Replayed robot, disable IO implementations
-            default:
-                drive = new Drive(new DriveIO() {
-                });
-                break;
+            default -> drive = new Drive(new DriveIO() {
+            });
         }
 
         // Initialize autonomous container
+        AutonomousContainer.getInstance().setDebugPrints(true);
         AutonomousContainer.getInstance().initialize(
                 false,
                 info -> new RamseteCommand(
@@ -77,7 +72,7 @@ public class RobotContainer {
                         drive
                 ),
                 drive::resetOdometry,
-                true,
+                false,
                 this
         );
 
@@ -97,6 +92,7 @@ public class RobotContainer {
      * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+
         drive.setDefaultCommand(
                 new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), -controller.getRightX()), drive));
         controller.leftBumper()
@@ -113,4 +109,6 @@ public class RobotContainer {
     public @Nullable GuiAuto getAutonomousCommand() {
         return AutonomousContainer.getInstance().getAuto(autoChooser.get(), sideChooser.get(), true);
     }
+
+
 }

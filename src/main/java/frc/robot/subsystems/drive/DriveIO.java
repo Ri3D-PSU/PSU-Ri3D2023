@@ -10,12 +10,13 @@ public interface DriveIO {
         public double rightPositionRad = 0.0;
         public double rightVelocityRadPerSec = 0.0;
         public double gyroYawRad = 0.0;
+        public double gyroYawRadPerSec = 0.0;
         public double leftLeaderCurrent = 0.0;
         public double leftFollowerCurrent = 0.0;
         public double rightLeaderCurrent = 0.0;
         public double rightFollowerCurrent = 0.0;
-
         public boolean isGyroReady = true;
+
 
     }
 
