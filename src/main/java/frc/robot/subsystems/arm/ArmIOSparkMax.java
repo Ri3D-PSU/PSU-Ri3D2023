@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 public class ArmIOSparkMax implements ArmIO {
 
@@ -23,14 +24,15 @@ public class ArmIOSparkMax implements ArmIO {
     }
 
     public void updateInputs(ArmInputs inputs) {
-        inputs.armPosition = arm.getEncoder().getPosition();
-        inputs.armVelocity = arm.getEncoder().getVelocity();
+        inputs.armPositionRad = arm.getEncoder().getPosition();
+        inputs.armVelocityRadPerSec = arm.getEncoder().getVelocity();
         inputs.armCurrent = arm.getOutputCurrent();
         inputs.armTemperature = arm.getMotorTemperature();
         inputs.armVoltage = arm.getBusVoltage();
     }
 
-    public void setArmPosition(double position) {
-        arm.getPIDController().setReference(position, CANSparkMax.ControlType.kPosition);
+    public void setArmPosition(double position, double ffvoltage) {
+        arm.getPIDController().setReference(position, CANSparkMax.ControlType.kPosition, 0,
+                ffvoltage, ArbFFUnits.kVoltage);
     }
 }

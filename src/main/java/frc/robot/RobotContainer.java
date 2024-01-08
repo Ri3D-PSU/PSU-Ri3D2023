@@ -18,13 +18,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOSparkMax;
-import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.ClawIO;
-import frc.robot.subsystems.claw.ClawIOSparkMax;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOFalcon500;
 import frc.robot.subsystems.drive.DriveIOSim;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
@@ -37,7 +37,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 public class RobotContainer {
     // Subsystems
     private Drive drive;
-    private Claw claw;
+    private Intake intake;
     private Arm arm;
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -46,10 +46,13 @@ public class RobotContainer {
     private final LoggedDashboardChooser<String> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     private final LoggedDashboardChooser<String> sideChooser = new LoggedDashboardChooser<>("Side Chooser");
 
-    private final LoggedDashboardNumber flywheelSpeed = new LoggedDashboardNumber("Flywheel Speed", 1500.0);
+    private final LoggedDashboardNumber shootSpeed = new LoggedDashboardNumber("Shoot Speed", 1500.0);
     private final LoggedDashboardNumber shootAngle = new LoggedDashboardNumber("Shoot Angle", 40);
     private final LoggedDashboardNumber pickupAngle = new LoggedDashboardNumber("Pickup Angle", -20);
-    private final LoggedDashboardNumber trapAngle = new LoggedDashboardNumber("Trap Angle", 100);
+    private final LoggedDashboardNumber ampScoringAngle = new LoggedDashboardNumber("Amp Scoring Angle", 40);
+    private final LoggedDashboardNumber ampScoringSpeed = new LoggedDashboardNumber("Amp Scoring Speed", 1000.0);
+    private final LoggedDashboardNumber intakeSpeed = new LoggedDashboardNumber("Intake Speed", 1000);
+    private final LoggedDashboardNumber ejectSpeed = new LoggedDashboardNumber("Eject Speed", -1000);
 
 
     /**
@@ -60,7 +63,7 @@ public class RobotContainer {
             // Real robot, instantiate hardware IO implementations
             case REAL -> {
                 drive = new Drive(new DriveIOFalcon500());
-                claw = new Claw(new ClawIOSparkMax());
+                intake = new Intake(new IntakeIOSparkMax());
                 arm = new Arm(new ArmIOSparkMax());
             }
 
@@ -68,7 +71,7 @@ public class RobotContainer {
             // Sim robot, instantiate physics sim IO implementations
             case SIM -> {
                 drive = new Drive(new DriveIOSim());
-                claw = new Claw(new ClawIOSparkMax());
+                intake = new Intake(new IntakeIOSparkMax());
                 arm = new Arm(new ArmIOSparkMax());
             }
 
@@ -76,7 +79,7 @@ public class RobotContainer {
             default -> {
                 drive = new Drive(new DriveIO() {
                 });
-                claw = new Claw(new ClawIO() {
+                intake = new Intake(new IntakeIO() {
                 });
                 arm = new Arm(new ArmIO() {
                 });
@@ -86,11 +89,11 @@ public class RobotContainer {
         // Configure the button bindings
         configureButtonBindings();
 
-        claw.setDefaultCommand(new RunCommand(
+        intake.setDefaultCommand(new RunCommand(
                 () -> {
-                    claw.setShooterVelocity(0, 0);
-                    claw.setIntakeVelocity(0);
-                }, claw
+                    intake.setPrimaryIntakeVelocity(0);
+                    intake.setSecondaryIntakeVelocity(0);
+                }, intake
         ));
 
         arm.setDefaultCommand(new RunCommand(
@@ -129,40 +132,44 @@ public class RobotContainer {
 
     @AutoBuilderAccessible
     Command intakeCommand = new RunCommand(
-            () -> {
-                claw.setIntakeVelocity(0.5);
-                arm.setArmPosition(pickupAngle.get());
-            }, claw, arm
-    );
+            () -> arm.setArmPosition(pickupAngle.get()), arm)
+            .until(() -> Math.abs(arm.getArmPosition() - pickupAngle.get()) < 5)
+            .andThen(() -> {
+                intake.setPrimaryIntakeVelocity(intakeSpeed.get());
+                intake.setSecondaryIntakeVelocity(intakeSpeed.get());
+            }, intake, arm)
+            .until(intake::isBeamBroken);
 
     @AutoBuilderAccessible
     Command outtakeCommand = new RunCommand(
             () -> {
-                claw.setIntakeVelocity(-0.5);
-            }, claw
+                intake.setPrimaryIntakeVelocity(ejectSpeed.get());
+                intake.setSecondaryIntakeVelocity(ejectSpeed.get());
+            }, intake
     );
 
     @AutoBuilderAccessible
     Command shootCommand = new RunCommand(
             () -> {
-                claw.setShooterVelocity(flywheelSpeed.get(), flywheelSpeed.get());
+                intake.setPrimaryIntakeVelocity(shootSpeed.get());
                 arm.setArmPosition(shootAngle.get());
-            }, claw, arm)
+            }, intake, arm)
             .until(() -> Math.abs(arm.getArmPosition() - shootAngle.get()) < 5
-                    && Math.abs(claw.getShooterVelocity() - flywheelSpeed.get()) < 100)
+                    && Math.abs(intake.getPrimaryIntakeVelocity() - shootSpeed.get()) < 100)
             .andThen(() -> {
-                claw.setIntakeVelocity(1000);
-                claw.setShooterVelocity(flywheelSpeed.get(), flywheelSpeed.get());
+                intake.setSecondaryIntakeVelocity(3000);
+                intake.setPrimaryIntakeVelocity(shootSpeed.get());
                 arm.setArmPosition(shootAngle.get());
-            }, claw, arm);
+            }, intake, arm);
 
     @AutoBuilderAccessible
-    Command scoreTrapCommand = new RunCommand(() -> {
-        arm.setArmPosition(trapAngle.get());
-        claw.setIntakeVelocity(0);
-    }, arm, claw)
-            .until(() -> Math.abs(arm.getArmPosition() - trapAngle.get()) < 5)
-            .andThen(() -> claw.setIntakeVelocity(100), arm, claw);
+    Command scoreAmp = new RunCommand(
+            () -> arm.setArmPosition(ampScoringAngle.get()), arm)
+            .until(() -> Math.abs(arm.getArmPosition() - ampScoringAngle.get()) < 5)
+            .andThen(() -> {
+                intake.setPrimaryIntakeVelocity(ampScoringSpeed.get());
+                intake.setSecondaryIntakeVelocity(ampScoringSpeed.get());
+            }, intake, arm);
 
 
     /**
@@ -181,8 +188,8 @@ public class RobotContainer {
         controller.rightTrigger().whileTrue(intakeCommand);
         controller.leftTrigger().whileTrue(outtakeCommand);
 
-        controller.a().whileTrue(shootCommand);
-        controller.povDown().whileTrue(scoreTrapCommand);
+        controller.a().whileTrue(scoreAmp);
+        controller.b().whileTrue(shootCommand);
     }
 
     /**
