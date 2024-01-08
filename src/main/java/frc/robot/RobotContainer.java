@@ -14,10 +14,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOSparkMax;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOFalcon500;
@@ -39,6 +43,7 @@ public class RobotContainer {
     private Drive drive;
     private Intake intake;
     private Arm arm;
+    private Climber climber;
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -65,6 +70,7 @@ public class RobotContainer {
                 drive = new Drive(new DriveIOFalcon500());
                 intake = new Intake(new IntakeIOSparkMax());
                 arm = new Arm(new ArmIOSparkMax());
+                climber = new Climber(new ClimberIOSparkMax());
             }
 
             // drive = new Drive(new DriveIOFalcon500());
@@ -73,6 +79,7 @@ public class RobotContainer {
                 drive = new Drive(new DriveIOSim());
                 intake = new Intake(new IntakeIOSparkMax());
                 arm = new Arm(new ArmIOSparkMax());
+                climber = new Climber(new ClimberIOSparkMax());
             }
 
             // Replayed robot, disable IO implementations
@@ -82,6 +89,8 @@ public class RobotContainer {
                 intake = new Intake(new IntakeIO() {
                 });
                 arm = new Arm(new ArmIO() {
+                });
+                climber = new Climber(new ClimberIO() {
                 });
             }
         }
@@ -171,6 +180,21 @@ public class RobotContainer {
                 intake.setSecondaryIntakeVelocity(ampScoringSpeed.get());
             }, intake, arm);
 
+    @AutoBuilderAccessible
+    Command climbCommand = new StartEndCommand(
+            () -> climber.setClimberPower(-0.5), () -> climber.stopClimber(), climber
+    );
+
+    @AutoBuilderAccessible
+    Command stopClimbCommand = new RunCommand(
+            () -> climber.stopClimber(), climber
+    );
+
+    @AutoBuilderAccessible
+    Command deployClimberCommand = new StartEndCommand(
+            () -> climber.extendClimber(), () -> climber.setClimberPower(0), climber
+    );
+
 
     /**
      * Use this method to define your button->command mappings. Buttons can be created by instantiating a
@@ -190,6 +214,9 @@ public class RobotContainer {
 
         controller.a().whileTrue(scoreAmp);
         controller.b().whileTrue(shootCommand);
+
+        controller.povUp().whileTrue(deployClimberCommand);
+        controller.povDown().whileTrue(climbCommand);
     }
 
     /**

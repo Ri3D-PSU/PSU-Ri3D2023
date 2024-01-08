@@ -1,17 +1,19 @@
 package frc.robot.subsystems.arm;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 public class ArmIOSparkMax implements ArmIO {
 
     CANSparkMax arm;
+    CANSparkMax armFollower;
 
     public ArmIOSparkMax() {
-        arm = new CANSparkMax(30, CANSparkMax.MotorType.kBrushless);
-        arm.getEncoder().setPositionConversionFactor(1.0 / 42.0); //TODO
-        arm.getEncoder().setVelocityConversionFactor(1.0 / 42.0); //TODO
-        arm.enableVoltageCompensation(10.0);
+        arm = new CANSparkMax(30, MotorType.kBrushless);
+        arm.getEncoder().setPositionConversionFactor((1.0 / 100.0) * (16.0 / 62.0));
+        arm.getEncoder().setVelocityConversionFactor((1.0 / 100.0) * (16.0 / 62.0) * (1.0 / 60.0) * 2.0 * Math.PI);
+        arm.enableVoltageCompensation(11.0);
         arm.setSmartCurrentLimit(40);
 
         arm.getPIDController().setP(0.01);
@@ -20,6 +22,9 @@ public class ArmIOSparkMax implements ArmIO {
         arm.getPIDController().setFF(0.0);
 
         arm.setSmartCurrentLimit(40);
+
+        armFollower = new CANSparkMax(31, MotorType.kBrushless);
+        armFollower.follow(arm, true);
 
     }
 
