@@ -1,6 +1,9 @@
 package frc.robot.subsystems.intake;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface IntakeIO {
+    @AutoLog
     public static class IntakeInputs {
         public double primaryIntakeVoltage = 0.0;
         public double primaryIntakeCurrent = 0.0;

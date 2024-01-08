@@ -1,6 +1,9 @@
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ArmIO {
+    @AutoLog
     public static class ArmInputs {
         public double armPositionRad = 0.0;
         public double armVelocityRadPerSec = 0.0;

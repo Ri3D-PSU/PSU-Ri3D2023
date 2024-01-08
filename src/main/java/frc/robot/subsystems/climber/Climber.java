@@ -1,13 +1,13 @@
 package frc.robot.subsystems.climber;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.climber.ClimberIO.ClimberInputs;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class Climber extends SubsystemBase {
 
     ClimberIO io;
-    ClimberInputs inputs = new ClimberInputs();
+    ClimberInputsAutoLogged inputs = new ClimberInputsAutoLogged();
 
     LoggedDashboardNumber climberStartPosition = new LoggedDashboardNumber("Climb Start Position", 32);
 
@@ -47,6 +47,11 @@ public class Climber extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        Logger.getInstance().processInputs("Climber", inputs);
+
+        Logger.getInstance().recordOutput("ClimberState", state.toString());
+        Logger.getInstance().recordOutput("ClimberTargetPower", targetPower);
+        Logger.getInstance().recordOutput("ClimberTargetPosition", targetPosition);
 
         switch (state) {
             case IDLE -> {

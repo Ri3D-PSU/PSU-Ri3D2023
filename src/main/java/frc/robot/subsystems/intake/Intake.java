@@ -1,28 +1,31 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intake.IntakeIO.IntakeInputs;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
 
     IntakeIO io;
-    IntakeInputs inputs = new IntakeInputs();
+    IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
 
     public Intake(IntakeIO io) {
         this.io = io;
     }
 
-    public void setPrimaryIntakeVelocity(double leftVelocity) {
-        io.setPrimaryIntakeVelocity(leftVelocity);
+    public void setPrimaryIntakeVelocity(double velocity) {
+        io.setPrimaryIntakeVelocity(velocity);
+        Logger.getInstance().recordOutput("PrimaryIntakeTargetVelocity", velocity);
     }
 
     public void setSecondaryIntakeVelocity(double velocity) {
         io.setSecondaryIntakeVelocity(velocity);
+        Logger.getInstance().recordOutput("SecondaryIntakeTargetVelocity", velocity);
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        Logger.getInstance().processInputs("Intake", inputs);
     }
 
     public double getPrimaryIntakeVelocity() {

@@ -127,7 +127,7 @@ public class RobotContainer {
                         drive
                 ),
                 drive::resetOdometry,
-                false,
+                true,
                 this
         );
 
