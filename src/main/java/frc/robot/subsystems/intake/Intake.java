@@ -35,4 +35,8 @@ public class Intake extends SubsystemBase {
     public boolean isBeamBroken() {
         return inputs.isBeamBroken;
     }
+
+    public double getSecondaryIntakeCurrent() {
+        return inputs.secondaryIntakeCurrent;
+    }
 }

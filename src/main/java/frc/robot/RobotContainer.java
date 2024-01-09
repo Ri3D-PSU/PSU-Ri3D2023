@@ -142,8 +142,12 @@ public class RobotContainer {
                 intake.setPrimaryIntakeVelocity(intakeSpeed.get());
                 intake.setSecondaryIntakeVelocity(intakeSpeed.get());
             }, intake)
-            .until(intake::isBeamBroken);
-
+            .withTimeout(0.15)
+            .andThen(() -> {
+                intake.setPrimaryIntakeVelocity(intakeSpeed.get());
+                intake.setSecondaryIntakeVelocity(intakeSpeed.get());
+            }, intake)
+            .until(() -> intake.getSecondaryIntakeCurrent() > 17);
     @AutoBuilderAccessible
     Command setArmIntake = new RunCommand(
             () -> arm.setArmPosition(pickupAngle.get()), arm);
@@ -221,7 +225,7 @@ public class RobotContainer {
         controller.y().onTrue(setArmAmp);
 
         controller.leftTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
-        controller.leftTrigger().and(setArmSource::isScheduled).whileTrue(pickupSource);
+        controller.leftTrigger().and(setArmSource::isScheduled).whileTrue(intakeCommand);
         controller.rightTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
 
         controller.povUp().whileTrue(deployClimberCommand);

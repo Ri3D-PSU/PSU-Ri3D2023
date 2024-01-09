@@ -1,26 +1,24 @@
 package frc.robot.subsystems.intake;
 
+import static frc.robot.Constants.RPM_TO_RAD_PER_SEC;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 public class IntakeIOSparkMax implements IntakeIO {
     CANSparkMax primaryIntake;
     CANSparkMax secondaryIntake;
 
-    DigitalInput beamBreak;
-
     public IntakeIOSparkMax() {
-        primaryIntake = new CANSparkMax(20, MotorType.kBrushless);
-        secondaryIntake = new CANSparkMax(22, MotorType.kBrushless);
-        beamBreak = new DigitalInput(0); // TODO: Does this exist?
+        primaryIntake = new CANSparkMax(7, MotorType.kBrushless);
+        secondaryIntake = new CANSparkMax(8, MotorType.kBrushless);
 
-        primaryIntake.getEncoder().setPositionConversionFactor(1.0 / 42.0); //TODO
-        secondaryIntake.getEncoder().setPositionConversionFactor(1.0 / 42.0); //TODO
+        primaryIntake.getEncoder().setPositionConversionFactor(1.0 / 5.0);
+        secondaryIntake.getEncoder().setPositionConversionFactor(1.0 / 20.0);
 
-        primaryIntake.getEncoder().setVelocityConversionFactor(1.0 / 42.0); //TODO
-        secondaryIntake.getEncoder().setVelocityConversionFactor(1.0 / 42.0); //TODO
+        primaryIntake.getEncoder().setVelocityConversionFactor((1.0 / 5.0) * RPM_TO_RAD_PER_SEC);
+        secondaryIntake.getEncoder().setVelocityConversionFactor((1.0 / 20.0) * RPM_TO_RAD_PER_SEC);
 
         primaryIntake.enableVoltageCompensation(10.0);
         secondaryIntake.enableVoltageCompensation(10.0);
@@ -28,22 +26,23 @@ public class IntakeIOSparkMax implements IntakeIO {
         primaryIntake.setSmartCurrentLimit(40);
         secondaryIntake.setSmartCurrentLimit(20); //neo 550
 
-        primaryIntake.getPIDController().setP(0.01);
-        primaryIntake.getPIDController().setI(0.0);
+        primaryIntake.getPIDController().setP(0.00);
+        primaryIntake.getPIDController().setI(0.00001);
         primaryIntake.getPIDController().setD(0.0);
         primaryIntake.getPIDController().setFF(0.0);
 
-        secondaryIntake.getPIDController().setP(0.01);
-        secondaryIntake.getPIDController().setI(0.0);
+        secondaryIntake.getPIDController().setP(0.00);
+        secondaryIntake.getPIDController().setI(0.00001);
         secondaryIntake.getPIDController().setD(0.0);
         secondaryIntake.getPIDController().setFF(0.0);
+
+        primaryIntake.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        secondaryIntake.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
     }
 
     @Override
     public void updateInputs(IntakeInputs inputs) {
-        inputs.isBeamBroken = beamBreak.get();
-
         inputs.primaryIntakeCurrent = primaryIntake.getOutputCurrent();
         inputs.primaryIntakeVoltage = primaryIntake.getBusVoltage();
         inputs.primaryIntakeVelocity = primaryIntake.getEncoder().getVelocity();

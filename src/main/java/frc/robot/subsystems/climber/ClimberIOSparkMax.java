@@ -9,20 +9,20 @@ public class ClimberIOSparkMax implements ClimberIO {
     CANSparkMax climberFollowerMotor;
 
     public ClimberIOSparkMax() {
-        climberMotor = new CANSparkMax(50, MotorType.kBrushless);
-        climberFollowerMotor = new CANSparkMax(51, MotorType.kBrushless);
+        climberMotor = new CANSparkMax(2, MotorType.kBrushless);
+        climberFollowerMotor = new CANSparkMax(4, MotorType.kBrushless);
 
-        climberMotor.getEncoder().setPositionConversionFactor(1.0 / 42.0); //TODO
-        climberFollowerMotor.getEncoder().setPositionConversionFactor(1.0 / 42.0); //TODO
+        climberMotor.getEncoder().setPositionConversionFactor((1.0 / 100.0) * 2.6 * Math.PI);
+        climberFollowerMotor.getEncoder().setPositionConversionFactor((1.0 / 100.0) * 2.6 * Math.PI);
 
-        climberMotor.getEncoder().setVelocityConversionFactor(1.0 / 42.0); //TODO
-        climberFollowerMotor.getEncoder().setVelocityConversionFactor(1.0 / 42.0); //TODO
+        climberMotor.getEncoder().setVelocityConversionFactor((1.0 / 100.0) * 2.6 * Math.PI / 60.0);
+        climberFollowerMotor.getEncoder().setVelocityConversionFactor((1.0 / 100.0) * 2.6 * Math.PI / 60.0);
 
-        climberMotor.getPIDController().setP(0.01);
+        climberMotor.getPIDController().setP(0.001);
         climberMotor.getPIDController().setI(0.0001);
         climberMotor.getPIDController().setD(0.0);
 
-        climberFollowerMotor.getPIDController().setP(0.01);
+        climberFollowerMotor.getPIDController().setP(0.001);
         climberFollowerMotor.getPIDController().setI(0.0001);
         climberFollowerMotor.getPIDController().setD(0.0);
     }
