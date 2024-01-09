@@ -22,7 +22,7 @@ public class Arm extends SubsystemBase {
     public void setArmPosition(double position) {
         targetPosition = position;
     }
-
+    
     public double getTargetArmPosition() {
         return targetPosition;
     }

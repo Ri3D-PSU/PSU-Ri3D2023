@@ -148,13 +148,13 @@ public class RobotContainer {
     Command setArmIntake = new RunCommand(
             () -> arm.setArmPosition(pickupAngle.get()), arm);
 
+
     @AutoBuilderAccessible
     Command outtakeCommand = new RunCommand(
             () -> {
                 intake.setPrimaryIntakeVelocity(ejectSpeed.get());
                 intake.setSecondaryIntakeVelocity(ejectSpeed.get());
-            }, intake
-    );
+            }, intake);
 
     @AutoBuilderAccessible
     Command shootCommand = new RunCommand(
@@ -180,7 +180,6 @@ public class RobotContainer {
     @AutoBuilderAccessible
     Command setArmAmp = new RunCommand(
             () -> arm.setArmPosition(ampScoringAngle.get()), arm);
-
     @AutoBuilderAccessible
     Command climbCommand = new StartEndCommand(
             () -> climber.setClimberPower(-0.5), () -> climber.stopClimber(), climber
@@ -201,7 +200,6 @@ public class RobotContainer {
 
     @AutoBuilderAccessible
     Command pickupSource = new RunCommand(() -> intake.setPrimaryIntakeVelocity(sourcePickupSpeed.get()), intake);
-
 
     /**
      * Use this method to define your button->command mappings. Buttons can be created by instantiating a
@@ -228,7 +226,6 @@ public class RobotContainer {
 
         controller.povUp().whileTrue(deployClimberCommand);
         controller.povDown().whileTrue(climbCommand);
-
     }
 
     /**
