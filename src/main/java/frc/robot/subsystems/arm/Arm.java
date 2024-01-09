@@ -14,15 +14,16 @@ public class Arm extends SubsystemBase {
     }
 
     private double targetPosition = 0.0;
-    private final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
+    private final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.577
+            , 0.0);
 
     /**
      * @param position The position to set the arm to in degrees
      */
-    public void setArmPosition(double position) {
-        targetPosition = position;
+    public void setArmPositionDegrees(double position) {
+        targetPosition = Math.toRadians(position);
     }
-    
+
     public double getTargetArmPosition() {
         return targetPosition;
     }
@@ -31,6 +32,8 @@ public class Arm extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.getInstance().processInputs("Arm", inputs);
+        Logger.getInstance().recordOutput("Arm Angle", Math.toDegrees(inputs.armPositionRad));
+        Logger.getInstance().recordOutput("Target Arm Angle", Math.toDegrees(targetPosition));
 
         double armffvoltage = feedforward.calculate(inputs.armPositionRad, inputs.armVelocityRadPerSec);
         Logger.getInstance().recordOutput("ArmFFVoltage", armffvoltage);
@@ -40,5 +43,13 @@ public class Arm extends SubsystemBase {
 
     public double getArmPosition() {
         return inputs.armPositionRad;
+    }
+
+    public void adjustAnglePosition(double degrees) {
+        io.adjustArmAngle(Math.toRadians(degrees));
+    }
+
+    public void resetAngle(double radians) {
+
     }
 }

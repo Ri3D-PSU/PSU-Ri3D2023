@@ -125,7 +125,7 @@ public class Drive extends SubsystemBase {
     }
 
     public SimpleMotorFeedforward getFeedforward() {
-        return new SimpleMotorFeedforward(0.0, 0.7, 0.2); //Temp values
+        return new SimpleMotorFeedforward(0.0, 3, 0.3); //Temp values
     }
 
     public DifferentialDriveKinematics getKinematics() {

@@ -32,7 +32,7 @@ public class Climber extends SubsystemBase {
     }
 
     public void stopClimber() {
-        state = ClimberState.TargetPosition;
+        state = ClimberState.IDLE;
         targetPower = 0.0;
         targetPosition = getClimberPosition();
     }

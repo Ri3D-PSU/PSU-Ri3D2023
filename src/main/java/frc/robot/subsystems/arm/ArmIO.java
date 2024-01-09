@@ -22,4 +22,12 @@ public interface ArmIO {
     public default void setArmPosition(double position, double ffvoltage) {
 
     }
+
+    public default void adjustArmAngle(double angleRadians) {
+
+    }
+
+    public default void armAngle(double angleRadians) {
+
+    }
 }

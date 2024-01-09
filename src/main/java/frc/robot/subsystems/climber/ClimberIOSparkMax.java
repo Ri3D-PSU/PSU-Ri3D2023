@@ -22,9 +22,11 @@ public class ClimberIOSparkMax implements ClimberIO {
         climberMotor.getPIDController().setI(0.0001);
         climberMotor.getPIDController().setD(0.0);
 
-        climberFollowerMotor.getPIDController().setP(0.001);
-        climberFollowerMotor.getPIDController().setI(0.0001);
+        climberFollowerMotor.getPIDController().setP(0.1);
+        climberFollowerMotor.getPIDController().setI(0.000001);
         climberFollowerMotor.getPIDController().setD(0.0);
+
+        climberFollowerMotor.setInverted(true);
     }
 
     public void updateInputs(ClimberInputs inputs) {

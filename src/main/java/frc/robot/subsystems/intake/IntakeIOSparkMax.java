@@ -27,14 +27,17 @@ public class IntakeIOSparkMax implements IntakeIO {
         secondaryIntake.setSmartCurrentLimit(20); //neo 550
 
         primaryIntake.getPIDController().setP(0.00);
-        primaryIntake.getPIDController().setI(0.00001);
+        primaryIntake.getPIDController().setI(0.00000);
         primaryIntake.getPIDController().setD(0.0);
-        primaryIntake.getPIDController().setFF(0.0);
+        primaryIntake.getPIDController().setFF(1.0 / 1000.0);
 
         secondaryIntake.getPIDController().setP(0.00);
-        secondaryIntake.getPIDController().setI(0.00001);
+        secondaryIntake.getPIDController().setI(0.00000);
         secondaryIntake.getPIDController().setD(0.0);
-        secondaryIntake.getPIDController().setFF(0.0);
+        secondaryIntake.getPIDController().setFF(1.0 / 1000.0);
+
+        primaryIntake.setInverted(true);
+        secondaryIntake.setInverted(false);
 
         primaryIntake.setIdleMode(CANSparkMax.IdleMode.kBrake);
         secondaryIntake.setIdleMode(CANSparkMax.IdleMode.kBrake);
@@ -56,11 +59,15 @@ public class IntakeIOSparkMax implements IntakeIO {
         inputs.secondaryIntakeTemperature = secondaryIntake.getMotorTemperature();
     }
 
+    @Override
     public void setPrimaryIntakeVelocity(double velocity) {
         primaryIntake.getPIDController().setReference(velocity, ControlType.kVelocity);
     }
 
+    @Override
     public void setSecondaryIntakeVelocity(double velocity) {
         secondaryIntake.getPIDController().setReference(velocity, ControlType.kVelocity);
     }
+
+
 }

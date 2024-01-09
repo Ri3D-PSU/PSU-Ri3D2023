@@ -11,10 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RamseteCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -51,10 +48,10 @@ public class RobotContainer {
     private final LoggedDashboardChooser<String> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     private final LoggedDashboardChooser<String> sideChooser = new LoggedDashboardChooser<>("Side Chooser");
 
-    private final LoggedDashboardNumber shootSpeed = new LoggedDashboardNumber("Shoot Speed", 1500.0);
-    private final LoggedDashboardNumber shootAngle = new LoggedDashboardNumber("Shoot Angle", 40);
-    private final LoggedDashboardNumber pickupAngle = new LoggedDashboardNumber("Pickup Angle", -20);
-    private final LoggedDashboardNumber ampScoringAngle = new LoggedDashboardNumber("Amp Scoring Angle", 40);
+    private final LoggedDashboardNumber shootSpeed = new LoggedDashboardNumber("Shoot Speed", -1500.0);
+    private final LoggedDashboardNumber shootAngle = new LoggedDashboardNumber("Shoot Angle", 120);
+    private final LoggedDashboardNumber pickupAngle = new LoggedDashboardNumber("Pickup Angle", -11);
+    private final LoggedDashboardNumber ampScoringAngle = new LoggedDashboardNumber("Amp Scoring Angle", 123);
     private final LoggedDashboardNumber ampScoringSpeed = new LoggedDashboardNumber("Amp Scoring Speed", 1000.0);
     private final LoggedDashboardNumber intakeSpeed = new LoggedDashboardNumber("Intake Speed", 1000);
     private final LoggedDashboardNumber ejectSpeed = new LoggedDashboardNumber("Eject Speed", -1000);
@@ -97,15 +94,74 @@ public class RobotContainer {
             }
         }
 
-        // Configure the button bindings
-        configureButtonBindings();
-
         intake.setDefaultCommand(new RunCommand(
                 () -> {
                     intake.setPrimaryIntakeVelocity(0);
                     intake.setSecondaryIntakeVelocity(0);
                 }, intake
         ));
+
+        intakeCommand = new RunCommand(
+                () -> {
+                    intake.setPrimaryIntakeVelocity(intakeSpeed.get());
+                    intake.setSecondaryIntakeVelocity(intakeSpeed.get());
+                }, intake)
+                .withTimeout(0.15)
+                .andThen(new RunCommand(() -> {
+                            intake.setPrimaryIntakeVelocity(intakeSpeed.get());
+                            intake.setSecondaryIntakeVelocity(intakeSpeed.get());
+                        }, intake)
+                                .until(() -> intake.getSecondaryIntakeCurrent() > 10)
+                );
+
+        setArmIntake = new RunCommand(
+                () -> arm.setArmPositionDegrees(pickupAngle.get()), arm);
+
+        outtakeCommand = new RunCommand(
+                () -> {
+                    intake.setPrimaryIntakeVelocity(ejectSpeed.get());
+                    intake.setSecondaryIntakeVelocity(ejectSpeed.get());
+                }, intake);
+
+        setArmShoot = new RunCommand(
+                () -> arm.setArmPositionDegrees(shootAngle.get()), arm);
+        shootCommand = new RunCommand(
+                () -> {
+                    intake.setPrimaryIntakeVelocity(shootSpeed.get());
+                }, intake)
+                .withTimeout(1)
+                .andThen(new RunCommand(() -> {
+                    intake.setSecondaryIntakeVelocity(-3000);
+                    intake.setPrimaryIntakeVelocity(shootSpeed.get());
+                    arm.setArmPositionDegrees(shootAngle.get());
+                }, intake, arm));
+
+        scoreAmp = new RunCommand(
+                () -> {
+                    intake.setPrimaryIntakeVelocity(ampScoringSpeed.get());
+                    intake.setSecondaryIntakeVelocity(ampScoringSpeed.get());
+                }, intake);
+
+        setArmAmp = new RunCommand(
+                () -> arm.setArmPositionDegrees(ampScoringAngle.get()), arm);
+
+        climberDownCommand = new StartEndCommand(
+                () -> climber.setClimberPower(-0.1), () -> climber.stopClimber(), climber);
+
+        climberUpCommand = new StartEndCommand(
+                () -> climber.s
+                etClimberPower(0.1), () -> climber.stopClimber(), climber);
+
+        stopClimbCommand = new RunCommand(
+                () -> climber.stopClimber(), climber);
+
+        deployClimberCommand = new StartEndCommand(
+                () -> climber.extendClimber(), () -> climber.setClimberPower(0), climber);
+
+        setArmSource = new RunCommand(() -> arm.setArmPositionDegrees(sourcePickupAngle.get()), arm);
+
+        // Configure the button bindings
+        configureButtonBindings();
 
         // Initialize autonomous container
         AutonomousContainer.getInstance().setDebugPrints(true);
@@ -118,8 +174,8 @@ public class RobotContainer {
                         drive.getFeedforward(),
                         drive.getKinematics(),
                         drive::getWheelSpeeds,
-                        new PIDController(0, 0, 0),
-                        new PIDController(0, 0, 0),
+                        new PIDController(0.5, 0, 0),
+                        new PIDController(0.5, 0, 0),
                         drive::driveVoltage,
                         drive
                 ),
@@ -137,73 +193,37 @@ public class RobotContainer {
 
 
     @AutoBuilderAccessible
-    Command intakeCommand = new RunCommand(
-            () -> {
-                intake.setPrimaryIntakeVelocity(intakeSpeed.get());
-                intake.setSecondaryIntakeVelocity(intakeSpeed.get());
-            }, intake)
-            .withTimeout(0.15)
-            .andThen(() -> {
-                intake.setPrimaryIntakeVelocity(intakeSpeed.get());
-                intake.setSecondaryIntakeVelocity(intakeSpeed.get());
-            }, intake)
-            .until(() -> intake.getSecondaryIntakeCurrent() > 17);
+    Command intakeCommand;
     @AutoBuilderAccessible
-    Command setArmIntake = new RunCommand(
-            () -> arm.setArmPosition(pickupAngle.get()), arm);
-
+    Command setArmIntake;
+    @AutoBuilderAccessible
+    Command outtakeCommand;
 
     @AutoBuilderAccessible
-    Command outtakeCommand = new RunCommand(
-            () -> {
-                intake.setPrimaryIntakeVelocity(ejectSpeed.get());
-                intake.setSecondaryIntakeVelocity(ejectSpeed.get());
-            }, intake);
+    Command shootCommand;
 
     @AutoBuilderAccessible
-    Command shootCommand = new RunCommand(
-            () -> {
-                intake.setPrimaryIntakeVelocity(shootSpeed.get());
-                arm.setArmPosition(shootAngle.get());
-            }, intake, arm)
-            .until(() -> Math.abs(arm.getArmPosition() - shootAngle.get()) < 5
-                    && Math.abs(intake.getPrimaryIntakeVelocity() - shootSpeed.get()) < 100)
-            .andThen(() -> {
-                intake.setSecondaryIntakeVelocity(3000);
-                intake.setPrimaryIntakeVelocity(shootSpeed.get());
-                arm.setArmPosition(shootAngle.get());
-            }, intake, arm);
+    Command setArmShoot;
 
     @AutoBuilderAccessible
-    Command scoreAmp = new RunCommand(
-            () -> {
-                intake.setPrimaryIntakeVelocity(ampScoringSpeed.get());
-                intake.setSecondaryIntakeVelocity(ampScoringSpeed.get());
-            }, intake);
+    Command scoreAmp;
 
     @AutoBuilderAccessible
-    Command setArmAmp = new RunCommand(
-            () -> arm.setArmPosition(ampScoringAngle.get()), arm);
+    Command setArmAmp;
     @AutoBuilderAccessible
-    Command climbCommand = new StartEndCommand(
-            () -> climber.setClimberPower(-0.5), () -> climber.stopClimber(), climber
-    );
+    Command climberDownCommand;
 
     @AutoBuilderAccessible
-    Command stopClimbCommand = new RunCommand(
-            () -> climber.stopClimber(), climber
-    );
+    Command climberUpCommand;
 
     @AutoBuilderAccessible
-    Command deployClimberCommand = new StartEndCommand(
-            () -> climber.extendClimber(), () -> climber.setClimberPower(0), climber
-    );
+    Command stopClimbCommand;
 
     @AutoBuilderAccessible
-    Command setArmSource = new RunCommand(() -> arm.setArmPosition(sourcePickupAngle.get()), arm);
+    Command deployClimberCommand;
 
     @AutoBuilderAccessible
-    Command pickupSource = new RunCommand(() -> intake.setPrimaryIntakeVelocity(sourcePickupSpeed.get()), intake);
+    Command setArmSource;
 
     /**
      * Use this method to define your button->command mappings. Buttons can be created by instantiating a
@@ -218,7 +238,7 @@ public class RobotContainer {
                         () -> drive.driveArcade(-controller.getLeftY() / 2.0, -controller.getRightX() / 2.0),
                         drive));
 
-        controller.rightTrigger().and(() -> !setArmAmp.isScheduled()).whileTrue(outtakeCommand);
+        controller.rightTrigger().whileTrue(outtakeCommand);
 
         controller.a().onTrue(setArmIntake);
         controller.b().onTrue(setArmSource);
@@ -226,10 +246,16 @@ public class RobotContainer {
 
         controller.leftTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
         controller.leftTrigger().and(setArmSource::isScheduled).whileTrue(intakeCommand);
-        controller.rightTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
+        controller.leftTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
 
         controller.povUp().whileTrue(deployClimberCommand);
-        controller.povDown().whileTrue(climbCommand);
+        controller.povDown().whileTrue(climberDownCommand);
+
+        controller.rightBumper().whileTrue(shootCommand);
+
+        controller.povLeft().onTrue(new InstantCommand(() -> arm.adjustAnglePosition(-5)));
+        controller.povRight().onTrue(new InstantCommand(() -> arm.adjustAnglePosition(5)));
+
     }
 
     /**
@@ -239,6 +265,10 @@ public class RobotContainer {
      */
     public @Nullable GuiAuto getAutonomousCommand() {
         return AutonomousContainer.getInstance().getAuto(autoChooser.get(), sideChooser.get(), true);
+    }
+
+    public void setArmAngle(double degrees) {
+        arm.resetAngle(Math.toRadians(degrees));
     }
 
 
