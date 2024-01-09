@@ -39,4 +39,8 @@ public class Intake extends SubsystemBase {
     public double getSecondaryIntakeCurrent() {
         return inputs.secondaryIntakeCurrent;
     }
+
+    public double getPrimaryIntakeCurrent() {
+        return inputs.primaryIntakeCurrent;
+    }
 }

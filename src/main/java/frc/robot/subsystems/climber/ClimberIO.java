@@ -41,5 +41,9 @@ public interface ClimberIO {
 
     }
 
+    public default void resetSecondaryClimberPosition(double position) {
+
+    }
+
 
 }

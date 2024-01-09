@@ -19,6 +19,7 @@ public class Climber extends SubsystemBase {
         IDLE,
         CLIMBING,
         TargetPosition,
+        MAIN_ONLY
 
     }
 
@@ -28,6 +29,11 @@ public class Climber extends SubsystemBase {
 
     public void setClimberPower(double voltage) {
         state = ClimberState.CLIMBING;
+        targetPower = voltage;
+    }
+
+    public void setMainClimberPower(double voltage) {
+        state = ClimberState.MAIN_ONLY;
         targetPower = voltage;
     }
 
@@ -65,6 +71,11 @@ public class Climber extends SubsystemBase {
             case TargetPosition -> {
                 io.setPrimaryClimberPosition(targetPosition, 0.0);
                 io.setSecondaryClimberPosition(targetPosition, 0.0);
+            }
+            case MAIN_ONLY -> {
+                io.setPrimaryClimberPower(targetPower);
+                io.setSecondaryClimberPower(0.0);
+                io.resetSecondaryClimberPosition(inputs.climberPosition);
             }
         }
     }

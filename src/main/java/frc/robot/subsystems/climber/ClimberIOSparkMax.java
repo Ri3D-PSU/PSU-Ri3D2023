@@ -18,12 +18,12 @@ public class ClimberIOSparkMax implements ClimberIO {
         climberMotor.getEncoder().setVelocityConversionFactor((1.0 / 100.0) * 2.6 * Math.PI / 60.0);
         climberFollowerMotor.getEncoder().setVelocityConversionFactor((1.0 / 100.0) * 2.6 * Math.PI / 60.0);
 
-        climberMotor.getPIDController().setP(0.001);
-        climberMotor.getPIDController().setI(0.0001);
+        climberMotor.getPIDController().setP(1);
+        climberMotor.getPIDController().setI(0.0000);
         climberMotor.getPIDController().setD(0.0);
 
-        climberFollowerMotor.getPIDController().setP(0.1);
-        climberFollowerMotor.getPIDController().setI(0.000001);
+        climberFollowerMotor.getPIDController().setP(5);
+        climberFollowerMotor.getPIDController().setI(0.01);
         climberFollowerMotor.getPIDController().setD(0.0);
 
         climberFollowerMotor.setInverted(true);
@@ -57,5 +57,10 @@ public class ClimberIOSparkMax implements ClimberIO {
 
     public void setSecondaryClimberPosition(double position, double ffvoltage) {
         climberFollowerMotor.getPIDController().setReference(position, CANSparkMax.ControlType.kPosition, 0, ffvoltage);
+    }
+
+    @Override
+    public void resetSecondaryClimberPosition(double position) {
+        climberFollowerMotor.getEncoder().setPosition(position);
     }
 }

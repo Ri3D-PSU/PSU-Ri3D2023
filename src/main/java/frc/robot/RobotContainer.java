@@ -26,6 +26,7 @@ import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
+import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
@@ -106,12 +107,12 @@ public class RobotContainer {
                     intake.setPrimaryIntakeVelocity(intakeSpeed.get());
                     intake.setSecondaryIntakeVelocity(intakeSpeed.get());
                 }, intake)
-                .withTimeout(0.15)
+                .withTimeout(0.25)
                 .andThen(new RunCommand(() -> {
                             intake.setPrimaryIntakeVelocity(intakeSpeed.get());
                             intake.setSecondaryIntakeVelocity(intakeSpeed.get());
                         }, intake)
-                                .until(() -> intake.getSecondaryIntakeCurrent() > 10)
+                                .until(() -> intake.getSecondaryIntakeCurrent() > 6)
                 );
 
         setArmIntake = new RunCommand(
@@ -133,24 +134,62 @@ public class RobotContainer {
                 .andThen(new RunCommand(() -> {
                     intake.setSecondaryIntakeVelocity(-3000);
                     intake.setPrimaryIntakeVelocity(shootSpeed.get());
-                    arm.setArmPositionDegrees(shootAngle.get());
-                }, intake, arm));
+                }, intake));
 
-        scoreAmp = new RunCommand(
-                () -> {
+        scoreAmp = new Command() {
+
+            double timeLeftEjecting = 0;
+            double stalledTime = 0;
+
+            @Override
+            public void initialize() {
+                timeLeftEjecting = 0;
+                stalledTime = 0;
+            }
+
+            @Override
+            public void execute() {
+                timeLeftEjecting -= 0.02;
+
+                if (timeLeftEjecting <= 0 && intake.getPrimaryIntakeCurrent() > 35) {
+                    stalledTime += 0.02;
+                } else {
+                    stalledTime = 0;
+                }
+
+                if (stalledTime > 0.2) {
+                    timeLeftEjecting = 0.05;
+                }
+
+                if (timeLeftEjecting <= 0) {
                     intake.setPrimaryIntakeVelocity(ampScoringSpeed.get());
                     intake.setSecondaryIntakeVelocity(ampScoringSpeed.get());
-                }, intake);
+                } else {
+                    intake.setPrimaryIntakeVelocity(-200);
+                    intake.setSecondaryIntakeVelocity(-200);
+                }
+            }
+
+            @Override
+            public Set<Subsystem> getRequirements() {
+                return Set.of(intake);
+            }
+        };
 
         setArmAmp = new RunCommand(
                 () -> arm.setArmPositionDegrees(ampScoringAngle.get()), arm);
 
         climberDownCommand = new StartEndCommand(
-                () -> climber.setClimberPower(-0.1), () -> climber.stopClimber(), climber);
+                () -> climber.setClimberPower(-0.5), () -> climber.stopClimber(), climber);
 
         climberUpCommand = new StartEndCommand(
-                () -> climber.s
-                etClimberPower(0.1), () -> climber.stopClimber(), climber);
+                () -> climber.setClimberPower(0.8), () -> climber.stopClimber(), climber);
+
+        climberMainDownCommand = new StartEndCommand(
+                () -> climber.setMainClimberPower(-0.2), () -> climber.stopClimber(), climber);
+
+        climberMainUpCommand = new StartEndCommand(
+                () -> climber.setMainClimberPower(0.2), () -> climber.stopClimber(), climber);
 
         stopClimbCommand = new RunCommand(
                 () -> climber.stopClimber(), climber);
@@ -162,6 +201,8 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+
+        arm.setDefaultCommand(setArmIntake);
 
         // Initialize autonomous container
         AutonomousContainer.getInstance().setDebugPrints(true);
@@ -217,6 +258,12 @@ public class RobotContainer {
     Command climberUpCommand;
 
     @AutoBuilderAccessible
+    Command climberMainDownCommand;
+
+    @AutoBuilderAccessible
+    Command climberMainUpCommand;
+
+    @AutoBuilderAccessible
     Command stopClimbCommand;
 
     @AutoBuilderAccessible
@@ -238,18 +285,21 @@ public class RobotContainer {
                         () -> drive.driveArcade(-controller.getLeftY() / 2.0, -controller.getRightX() / 2.0),
                         drive));
 
-        controller.rightTrigger().whileTrue(outtakeCommand);
+        controller.leftTrigger().whileTrue(outtakeCommand);
 
         controller.a().onTrue(setArmIntake);
         controller.b().onTrue(setArmSource);
         controller.y().onTrue(setArmAmp);
 
-        controller.leftTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
-        controller.leftTrigger().and(setArmSource::isScheduled).whileTrue(intakeCommand);
-        controller.leftTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
+        controller.rightTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
+        controller.rightTrigger().and(setArmSource::isScheduled).whileTrue(intakeCommand);
+        controller.rightTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
 
-        controller.povUp().whileTrue(deployClimberCommand);
-        controller.povDown().whileTrue(climberDownCommand);
+        controller.povUp().and(() -> !controller.start().getAsBoolean()).whileTrue(climberUpCommand);
+        controller.povDown().and(() -> !controller.start().getAsBoolean()).whileTrue(climberDownCommand);
+
+        controller.povUp().and(() -> controller.start().getAsBoolean()).whileTrue(climberMainUpCommand);
+        controller.povDown().and(() -> controller.start().getAsBoolean()).whileTrue(climberMainDownCommand);
 
         controller.rightBumper().whileTrue(shootCommand);
 
