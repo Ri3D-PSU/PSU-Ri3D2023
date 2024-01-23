@@ -56,7 +56,7 @@ public class RobotContainer {
     private final LoggedDashboardNumber ampScoringSpeed = new LoggedDashboardNumber("Amp Scoring Speed", 1000.0);
     private final LoggedDashboardNumber intakeSpeed = new LoggedDashboardNumber("Intake Speed", 1000);
     private final LoggedDashboardNumber ejectSpeed = new LoggedDashboardNumber("Eject Speed", -1000);
-    private final LoggedDashboardNumber sourcePickupAngle = new LoggedDashboardNumber("Source Pickup Angle", 40);
+    private final LoggedDashboardNumber sourcePickupAngle = new LoggedDashboardNumber("Source Pickup Angle", 70);
     private final LoggedDashboardNumber sourcePickupSpeed = new LoggedDashboardNumber("Source Pickup Speed", -1000);
 
 
@@ -279,7 +279,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         drive.setDefaultCommand(
-                new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), -controller.getRightX()), drive));
+                new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), -controller.getRightX() / 1.5), drive));
         controller.leftBumper()
                 .whileTrue(new RunCommand(
                         () -> drive.driveArcade(-controller.getLeftY() / 2.0, -controller.getRightX() / 2.0),
@@ -297,7 +297,7 @@ public class RobotContainer {
 
         controller.povUp().and(() -> !controller.start().getAsBoolean()).whileTrue(climberUpCommand);
         controller.povDown().and(() -> !controller.start().getAsBoolean()).whileTrue(climberDownCommand);
-
+        
         controller.povUp().and(() -> controller.start().getAsBoolean()).whileTrue(climberMainUpCommand);
         controller.povDown().and(() -> controller.start().getAsBoolean()).whileTrue(climberMainDownCommand);
 
