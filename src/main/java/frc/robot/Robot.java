@@ -7,8 +7,7 @@ package frc.robot;
 import static frc.robot.Constants.LOG_DIRECTORY;
 import static frc.robot.Constants.MIN_FREE_SPACE;
 
-import com.dacubeking.AutoBuilder.robot.reflection.ClassInformationSender;
-import com.dacubeking.AutoBuilder.robot.robotinterface.AutonomousContainer;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -111,7 +110,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {
         // Ensure that the selected autonomous command is loaded
-        AutonomousContainer.getInstance().loadAuto(robotContainer.getAutonomousCommand());
+        //AutonomousContainer.getInstance().loadAuto(robotContainer.getAutonomousCommand());
     }
 
     /**
@@ -120,11 +119,11 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousInit() {
         System.out.println("AutonomousInit");
-        autonomousCommand = robotContainer.getAutonomousCommand();
-        // schedule the autonomous command (example)
-        if (autonomousCommand != null) {
-            autonomousCommand.schedule();
-        }
+        // autonomousCommand = robotContainer.getAutonomousCommand();
+        // // schedule the autonomous command (example)
+        // if (autonomousCommand != null) {
+        //     autonomousCommand.schedule();
+        // }
     }
 
     /**
@@ -176,7 +175,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void simulationInit() {
-        ClassInformationSender.updateReflectionInformation("frc.robot");
+        // ClassInformationSender.updateReflectionInformation("frc.robot");
         DriverStation.silenceJoystickConnectionWarning(true);
     }
 

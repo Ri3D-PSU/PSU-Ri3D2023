@@ -58,10 +58,6 @@ repositories {
     }
   }
   mavenLocal()
-
-  maven {
-    url "https://maven.dacubeking.com/snapshots/"
-  }
 }
 
 configurations.all {
@@ -96,7 +92,7 @@ dependencies {
   def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
   annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 
-  implementation "com.dacubeking:autobuilder-robot:2.2.20-command-rewrite-beta"
+  //implementation "com.dacubeking:autobuilder-robot:2.2.20-command-rewrite-beta"
 }
 
 test {

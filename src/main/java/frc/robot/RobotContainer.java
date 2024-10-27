@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import com.dacubeking.AutoBuilder.robot.GuiAuto;
-import com.dacubeking.AutoBuilder.robot.annotations.AutoBuilderAccessible;
-import com.dacubeking.AutoBuilder.robot.robotinterface.AutonomousContainer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -205,71 +202,47 @@ public class RobotContainer {
         arm.setDefaultCommand(setArmIntake);
 
         // Initialize autonomous container
-        AutonomousContainer.getInstance().setDebugPrints(true);
-        AutonomousContainer.getInstance().initialize(
-                false,
-                info -> new RamseteCommand(
-                        info.trajectory(),
-                        drive::getPose,
-                        new RamseteController(),
-                        drive.getFeedforward(),
-                        drive.getKinematics(),
-                        drive::getWheelSpeeds,
-                        new PIDController(0.5, 0, 0),
-                        new PIDController(0.5, 0, 0),
-                        drive::driveVoltage,
-                        drive
-                ),
-                drive::resetOdometry,
-                true,
-                this
-        );
+        // AutonomousContainer.getInstance().setDebugPrints(true);
+        // AutonomousContainer.getInstance().initialize(
+        //         false,
+        //         info -> new RamseteCommand(
+        //                 info.trajectory(),
+        //                 drive::getPose,
+        //                 new RamseteController(),
+        //                 drive.getFeedforward(),
+        //                 drive.getKinematics(),
+        //                 drive::getWheelSpeeds,
+        //                 new PIDController(0.5, 0, 0),
+        //                 new PIDController(0.5, 0, 0),
+        //                 drive::driveVoltage,
+        //                 drive
+        //         ),
+        //         drive::resetOdometry,
+        //         true,
+        //         this
+        // );
 
         // Set up auto routines
         sideChooser.addDefaultOption("Blue", "blue");
         sideChooser.addOption("Red", "red");
 
-        AutonomousContainer.getInstance().getAutonomousNames().forEach(name -> autoChooser.addOption(name, name));
+        // AutonomousContainer.getInstance().getAutonomousNames().forEach(name -> autoChooser.addOption(name, name));
     }
 
 
-    @AutoBuilderAccessible
     Command intakeCommand;
-    @AutoBuilderAccessible
     Command setArmIntake;
-    @AutoBuilderAccessible
     Command outtakeCommand;
-
-    @AutoBuilderAccessible
     Command shootCommand;
-
-    @AutoBuilderAccessible
     Command setArmShoot;
-
-    @AutoBuilderAccessible
     Command scoreAmp;
-
-    @AutoBuilderAccessible
     Command setArmAmp;
-    @AutoBuilderAccessible
     Command climberDownCommand;
-
-    @AutoBuilderAccessible
     Command climberUpCommand;
-
-    @AutoBuilderAccessible
     Command climberMainDownCommand;
-
-    @AutoBuilderAccessible
     Command climberMainUpCommand;
-
-    @AutoBuilderAccessible
     Command stopClimbCommand;
-
-    @AutoBuilderAccessible
     Command deployClimberCommand;
-
-    @AutoBuilderAccessible
     Command setArmSource;
 
     /**
@@ -291,7 +264,7 @@ public class RobotContainer {
         controller.b().onTrue(setArmSource);
         controller.y().onTrue(setArmAmp);
 
-        controller.rightTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
+        // controller.rightTrigger().and(setArmIntake::isScheduled).whileTrue(intakeCommand);
         controller.rightTrigger().and(setArmSource::isScheduled).whileTrue(intakeCommand);
         controller.rightTrigger().and(setArmAmp::isScheduled).whileTrue(scoreAmp);
 
@@ -308,14 +281,6 @@ public class RobotContainer {
 
     }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
-    public @Nullable GuiAuto getAutonomousCommand() {
-        return AutonomousContainer.getInstance().getAuto(autoChooser.get(), sideChooser.get(), true);
-    }
 
     public void setArmAngle(double degrees) {
         arm.resetAngle(Math.toRadians(degrees));
